@@ -13,9 +13,9 @@ exports.listCurso = async (req, res) => {
         const cursos = await db.cursos.findAll(
              {
                             include: {
-                              model: db.videos, // Incluir los cursos relacionados
+                              model: db.videos, 
                               attributes: ['id','titulo','url_video','orden_video'], 
-                              order: [['orden_video', 'ASC']], // Obtener solo los campos que queremos
+                              order: [['orden_video', 'ASC']], 
                             },
                           }
         );
@@ -24,6 +24,23 @@ exports.listCurso = async (req, res) => {
         sendError500(error);
     }
 }
+exports.listCursosPorProfesor = async (req, res) => {
+    const { profesor_id } = req.params;
+    try {
+        const cursos = await db.cursos.findAll({
+            where: { profesor_id },
+            include: {
+                model: db.videos,
+                attributes: ['id', 'titulo', 'url_video', 'orden_video'],
+                order: [['orden_video', 'ASC']]
+            }
+        });
+        res.json(cursos);
+    } catch (error) {
+        sendError500(res, error);
+    }
+};
+
 
 exports.getCursoById = async (req, res) => {
     const id = req.params.id;
@@ -40,22 +57,26 @@ exports.getCursoById = async (req, res) => {
 
 exports.createCurso = async (req, res) => {
 //Falta agregar profersor_di
-    const requiredFields = ['nombre','descripcion','categoria_id'];
+    const requiredFields = ['nombre','descripcion','categoria_id','profesor_id'];
     if (!isRequestValid(requiredFields, req.body, res)) {
         return;
+    }
+    if (!req.body.profesor_id) {
+        return res.status(400).json({ error: 'El profesor_id es obligatorio' });
     }
     try {
 
         const curso = {
             nombre: req.body.nombre,
             descripcion:req.body.descripcion,
-            categoria_id:req.body.categoria_id
+            categoria_id:req.body.categoria_id,
+            profesor_id:req.body.profesor_id
         }
         const cursoCreada = await db.cursos.create(curso);
 
         res.status(201).json(cursoCreada);
     } catch (error) {
-        sendError500(error);
+        sendError500(res,error);
     }
 }
 exports.updateCursoPatch = async (req, res) => {
@@ -105,6 +126,14 @@ exports.deleteCurso = async (req, res) => {
         if (!curso) {
             return;
         }
+        await db.videos.destroy({
+            where: { curso_id: id }
+        });
+
+        await db.inscripciones.destroy({ where: { curso_id: id } });
+        await db.notas.destroy({ where: { curso_id: id } });
+        await db.comentarios.destroy({ where: { curso_id: id } });
+
         await curso.destroy();
         res.json({
             msg: 'Curso eliminado correctamente'
@@ -118,8 +147,8 @@ async function getCursoOr404(id, res) {
         {
             include: {
                 model: db.videos,
-                attributes: ['id', 'titulo', 'url_video', 'orden_video'], // Seleccionamos solo los campos necesarios
-                order: [['orden_video', 'ASC']], // Ordenamos los videos por el campo 'orden_video'
+                attributes: ['id', 'titulo', 'url_video', 'orden_video'],
+                order: [['orden_video', 'ASC']], 
             },
         }
 

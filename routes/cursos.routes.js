@@ -3,6 +3,7 @@ module.exports = app => {
     const controller = require("../controllers/cursos.controller");
 
     router.get('/', controller.listCurso);
+    router.get("/profesor/:profesor_id", controller.listCursosPorProfesor);
     router.get('/:id', controller.getCursoById);
     router.post('/', controller.createCurso);
     router.put('/:id', controller.updateCursoPut);
