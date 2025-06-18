@@ -12,10 +12,9 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false
         },
-        //editar a false una vez se tenga usuario
         profesor_id: {
             type: Sequelize.INTEGER,
-            allowNull: true
+            allowNull: false
         },
 
     });

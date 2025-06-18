@@ -8,11 +8,9 @@ module.exports = {
        }
        return true;
    },
-   
-   sendError500: (error) => {
-       console.log('Error', error);
-       res.status(500).json({
-           msg: 'Error en el servidor'
-       });
-   },
+ sendError500(res, error) {
+    console.error(error); 
+    return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+},
+
 }

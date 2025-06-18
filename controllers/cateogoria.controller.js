@@ -13,8 +13,8 @@ exports.listCategoria = async (req, res) => {
         const categorias = await db.categorias.findAll(
             {
                 include: {
-                  model: db.cursos, // Incluir los cursos relacionados
-                  attributes: ['id','nombre','descripcion'], // Obtener solo los campos que queremos
+                  model: db.cursos, 
+                  attributes: ['id','nombre','descripcion'], 
                 },
               }
         );
